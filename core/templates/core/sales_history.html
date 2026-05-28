@@ -1,0 +1,88 @@
+{% extends 'core/base.html' %}
+{% block title %}Sales History — {{ store.store_name }}{% endblock %}
+{% block page_title %}Sales History{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap gap-2 mb-4 align-items-center justify-content-between">
+  <form class="d-flex gap-2 align-items-center" method="get">
+    <label class="small fw-semibold text-muted">Date:</label>
+    <input type="date" name="date" class="form-control form-control-sm" value="{{ filter_date|date:'Y-m-d' }}">
+    <button type="submit" class="btn btn-sm btn-outline-secondary">View</button>
+  </form>
+  <a href="{% url 'sales_pdf' %}?date={{ filter_date|date:'Y-m-d' }}" class="btn btn-sm btn-danger">
+    <i class="bi bi-file-earmark-pdf me-1"></i> Export PDF
+  </a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-label">Total Revenue</div>
+      <div class="stat-value text-primary" style="font-size:22px;">KES {{ total_revenue|floatformat:2 }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-label">Total Profit</div>
+      <div class="stat-value text-success" style="font-size:22px;">KES {{ total_profit|floatformat:2 }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-label">Sales Count</div>
+      <div class="stat-value" style="font-size:22px;">{{ sales|length }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-card-title">Sales on {{ filter_date|date:"d F Y" }}</span>
+  </div>
+  {% if sales %}
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead class="table-light">
+        <tr>
+          <th class="ps-3">Product</th>
+          <th>Qty</th>
+          <th>Unit Price</th>
+          <th>Revenue</th>
+          <th>Profit</th>
+          <th>Attendant</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sale in sales %}
+        <tr>
+          <td class="ps-3 fw-semibold">{{ sale.product_name }}</td>
+          <td>{{ sale.quantity }}</td>
+          <td>KES {{ sale.selling_price|floatformat:2 }}</td>
+          <td>KES {{ sale.total|floatformat:2 }}</td>
+          <td class="text-success">KES {{ sale.profit|floatformat:2 }}</td>
+          <td class="text-muted small">{{ sale.attendant.get_full_name|default:sale.attendant.username }}</td>
+          <td class="text-muted small">{{ sale.timestamp|time:"H:i" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot class="table-light fw-bold">
+        <tr>
+          <td class="ps-3">Totals</td>
+          <td>{{ sales|length }}</td>
+          <td></td>
+          <td>KES {{ total_revenue|floatformat:2 }}</td>
+          <td class="text-success">KES {{ total_profit|floatformat:2 }}</td>
+          <td colspan="2"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  {% else %}
+  <div class="p-5 text-center text-muted">
+    <i class="bi bi-receipt fs-1 d-block mb-2 opacity-25"></i>
+    No sales on {{ filter_date|date:"d F Y" }}.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
