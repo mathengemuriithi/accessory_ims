@@ -1,0 +1,70 @@
+{% extends 'core/base.html' %}
+{% block title %}Stock Reconciliation — {{ store.store_name }}{% endblock %}
+{% block page_title %}Stock Reconciliation{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-end mb-4">
+  <a href="{% url 'reconciliation_form' %}" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-lg me-1"></i> New Stock Count
+  </a>
+</div>
+
+<div class="table-card">
+  <div class="table-card-header">
+    <span class="table-card-title">Reconciliation History</span>
+  </div>
+  {% if records %}
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead class="table-light">
+        <tr>
+          <th class="ps-3">Product</th>
+          <th>System Count</th>
+          <th>Physical Count</th>
+          <th>Discrepancy</th>
+          <th>Type</th>
+          <th>Recorded By</th>
+          <th>Date</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+          <td class="ps-3 fw-semibold">{{ r.product_name }}</td>
+          <td>{{ r.system_count }}</td>
+          <td>{{ r.physical_count }}</td>
+          <td>
+            {% if r.discrepancy == 0 %}
+            <span class="badge-ok">0</span>
+            {% elif r.discrepancy < 0 %}
+            <span class="badge-low">{{ r.discrepancy }}</span>
+            {% else %}
+            <span style="background:#d1fae5;color:#059669;font-size:11px;padding:3px 8px;border-radius:20px;">+{{ r.discrepancy }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if r.reconciliation_type == 'matched' %}
+            <span class="badge bg-success bg-opacity-10 text-success">Matched</span>
+            {% elif r.reconciliation_type == 'shrinkage' %}
+            <span class="badge bg-danger bg-opacity-10 text-danger">Shrinkage</span>
+            {% else %}
+            <span class="badge bg-info bg-opacity-10 text-info">Surplus</span>
+            {% endif %}
+          </td>
+          <td class="text-muted small">{{ r.recorded_by.get_full_name|default:r.recorded_by.username }}</td>
+          <td class="text-muted small">{{ r.timestamp|date:"d M Y H:i" }}</td>
+          <td class="text-muted small">{{ r.notes|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="p-5 text-center text-muted">
+    <i class="bi bi-clipboard-check fs-1 d-block mb-2 opacity-25"></i>
+    No reconciliations recorded yet.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

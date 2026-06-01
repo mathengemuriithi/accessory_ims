@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Store Setup</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    body { background: #0f172a; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .setup-card { background: white; border-radius: 16px; padding: 40px; width: 100%; max-width: 480px; box-shadow: 0 25px 60px rgba(0,0,0,0.3); }
+    .step-badge { background: #ede9fe; color: #6366f1; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .btn-primary { background: #6366f1; border-color: #6366f1; }
+    .btn-primary:hover { background: #4f46e5; border-color: #4f46e5; }
+  </style>
+</head>
+<body>
+  <div class="setup-card">
+    <div class="text-center mb-4">
+      <i class="bi bi-bag-heart-fill" style="font-size:36px; color:#6366f1;"></i>
+      <h4 class="fw-bold mt-2 mb-1">Welcome to Accessory IMS</h4>
+      <span class="step-badge">First-time Setup</span>
+    </div>
+
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger small">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+
+      <p class="fw-semibold text-muted small text-uppercase mb-3" style="letter-spacing:.07em;">Store Info</p>
+      <div class="mb-3">
+        <label class="form-label fw-semibold small">Store Name</label>
+        {{ form.store_name }}
+        {% if form.store_name.errors %}<div class="text-danger small mt-1">{{ form.store_name.errors }}</div>{% endif %}
+      </div>
+      <div class="mb-4">
+        <label class="form-label fw-semibold small">Product Categories</label>
+        {{ form.categories }}
+        <div class="form-text">{{ form.categories.help_text }}</div>
+        {% if form.categories.errors %}<div class="text-danger small mt-1">{{ form.categories.errors }}</div>{% endif %}
+      </div>
+
+      <hr>
+      <p class="fw-semibold text-muted small text-uppercase mb-3" style="letter-spacing:.07em;">Admin Account</p>
+      <div class="mb-3">
+        <label class="form-label fw-semibold small">Username</label>
+        {{ form.admin_username }}
+        {% if form.admin_username.errors %}<div class="text-danger small mt-1">{{ form.admin_username.errors }}</div>{% endif %}
+      </div>
+      <div class="mb-3">
+        <label class="form-label fw-semibold small">Password</label>
+        {{ form.admin_password }}
+      </div>
+      <div class="mb-4">
+        <label class="form-label fw-semibold small">Confirm Password</label>
+        {{ form.admin_password_confirm }}
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 fw-semibold">Set Up Store</button>
+    </form>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
