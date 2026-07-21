@@ -18,7 +18,9 @@ urlpatterns = [
     path('admin-panel/sales/pdf/', views.sales_pdf, name='sales_pdf'),
     path('admin-panel/reconciliation/', views.reconciliation_list, name='reconciliation_list'),
     path('admin-panel/categories/', views.categories_list, name='categories_list'),
-    path('admin-panel/users/', views.users_list, name='users_list'),
+    path('admin-panel/categories/add/', views.category_add, name='category_add'),
+    path('admin-panel/categories/<int:pk>/edit/', views.category_edit, name='category_edit'),
+    path('admin-panel/users/', views.users_list, name='users_list'),  # ← ADDED THIS LINE
 
     # Attendant
     path('shop/', views.attendant_dashboard, name='attendant_dashboard'),

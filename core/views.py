@@ -27,16 +27,13 @@ def setup_view(request):
         form = StoreSetupForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            # Save store name
             store.store_name = data['store_name']
             store.is_setup_complete = True
             store.save()
-            # Create categories
             for cat_name in data['categories'].split(','):
                 cat_name = cat_name.strip()
                 if cat_name:
                     Category.objects.get_or_create(name=cat_name)
-            # Create admin user
             user = User.objects.create_user(
                 username=data['admin_username'],
                 password=data['admin_password']
@@ -95,8 +92,6 @@ def admin_dashboard(request):
     today_end = timezone.make_aware(datetime.datetime.combine(today, datetime.time.max))
 
     today_sales = Sale.objects.filter(timestamp__range=(today_start, today_end))
-    today_revenue = today_sales.aggregate(total=Sum('selling_price') * Sum('quantity'))
-    # Calculate properly
     today_revenue = sum(s.total for s in today_sales)
     today_profit = sum(s.profit for s in today_sales)
     today_count = today_sales.count()
@@ -104,7 +99,6 @@ def admin_dashboard(request):
     low_stock = Product.objects.filter(quantity__lte=5).order_by('quantity')
     recent_sales = today_sales.select_related('attendant')[:10]
 
-    # Last 7 days chart data
     chart_labels = []
     chart_revenue = []
     chart_profit = []
@@ -287,8 +281,57 @@ def categories_list(request):
             messages.success(request, f'"{cat.name}" deleted.')
             return redirect('categories_list')
 
-    context = {'store': store, 'categories': categories, 'form': form}
-    return render(request, 'core/categories.html', context)
+    context = {
+        'store': store,
+        'categories': categories,
+        'form': form,
+    }
+    return render(request, 'core/categories_list.html', context)
+
+
+@login_required
+@admin_required
+def category_add(request):
+    store = StoreSettings.get_settings()
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Category added successfully.')
+            return redirect('categories_list')
+    else:
+        form = CategoryForm()
+
+    context = {
+        'store': store,
+        'form': form,
+        'action': 'Add',
+    }
+    return render(request, 'core/category_form.html', context)
+
+
+@login_required
+@admin_required
+def category_edit(request, pk):
+    store = StoreSettings.get_settings()
+    category = get_object_or_404(Category, pk=pk)
+
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Category "{category.name}" updated successfully.')
+            return redirect('categories_list')
+    else:
+        form = CategoryForm(instance=category)
+
+    context = {
+        'store': store,
+        'form': form,
+        'category': category,
+        'action': 'Edit',
+    }
+    return render(request, 'core/category_form.html', context)
 
 
 @login_required
@@ -341,7 +384,6 @@ def attendant_dashboard(request):
 
     categories = Category.objects.all()
 
-    # Today's sales by this attendant
     today = timezone.localdate()
     today_start = timezone.make_aware(datetime.datetime.combine(today, datetime.time.min))
     today_end = timezone.make_aware(datetime.datetime.combine(today, datetime.time.max))
@@ -424,7 +466,6 @@ def reconciliation_form(request):
                 recorded_by=request.user,
             )
 
-            # Adjust stock to match physical count
             product.quantity = physical_count
             product.save()
 
